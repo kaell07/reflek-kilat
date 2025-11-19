@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tes Logika & Kecermatan Angka</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="menu-overlay" class="menu-overlay">
+    <div class="menu-content">
+        <h2>Tes Logika & Kecermatan</h2>
+        <p style="color:var(--muted); margin-bottom:10px;">Masukkan Nama Anda untuk Leaderboard (maks 15 karakter):</p>
+        <input type="text" id="username-input-menu" maxlength="15" placeholder="Nama Anda" autocomplete="off">
+        <button class="menu-btn" id="btnMulai">Mulai Permainan 🚀</button>
+        <button class="menu-btn" id="btnLihatLeaderboard">Lihat Leaderboard 🏆</button>
+
+        <div id="overlay-leaderboard-container">
+            <h3>Leaderboard (Top 10)</h3>
+            <ul id="overlay-leaderboard"></ul>
+            <button class="menu-btn" id="btnKembali">Kembali ke Menu</button>
+        </div>
+    </div>
+</div>
+
+<h1>Tes Logika & Kecermatan Angka</h1>
+<p class="sub">Timer mulai saat kamu menjawab soal pertama. Permainan terus berjalan meskipun jawaban salah.</p>
+
+<div id="timer">Waktu: 60</div>
+<div id="skor">Skor: 0</div>
+<div id="highscore">Skor Terbaik: 0</div>
+
+<div class="boxes" id="boxes"></div>
+<div class="options" id="options"></div>
+
+<div class="controls">
+    <button id="btnNew">Mulai Ulang</button>
+    <button id="btnBackToMenu" style="background:var(--muted);">Kembali ke Menu</button>
+</div>
+
+<div id="result"></div>
+<p class="small">Pilih salah satu jawaban untuk mengisi kotak yang kosong.</p>
+
+<div id="leaderboard-container" style="display:none;">
+    <h2>🏆 Leaderboard (Top 100)</h2>
+    <ul id="leaderboard"></ul>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
