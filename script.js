@@ -8,11 +8,10 @@ let waktu = 60;
 let timerInterval = null;
 let timerStarted = false;
 let username = ""; 
- 
 
 const LEADERBOARD_KEY = "logic_highscore_list";
 const MAX_LEADERBOARD = 100;
-  
+
 let highScores = getHighScores();
 let maxScore = highScores.length > 0 ? highScores[0].score : 0;
 document.getElementById("highscore").textContent = "Skor Terbaik: " + maxScore;
@@ -23,14 +22,15 @@ const resultEl = document.getElementById('result');
 const leaderboardEl = document.getElementById('leaderboard');
 const overlayLeaderboardEl = document.getElementById('overlay-leaderboard');
 const overlayLeaderboardContainerEl = document.getElementById('overlay-leaderboard-container');
-  
+const leaderboardContainerEl = document.getElementById('leaderboard-container'); 
+
 const menuOverlayEl = document.getElementById('menu-overlay');
 const menuBtnMulai = document.getElementById('btnMulai');
 const menuBtnLihatLeaderboard = document.getElementById('btnLihatLeaderboard');
 const menuBtnKembali = document.getElementById('btnKembali');
 const btnNewGame = document.getElementById("btnNew");
 const btnBackToMenu = document.getElementById("btnBackToMenu");
-  
+
 const usernameInputMenuEl = document.getElementById('username-input-menu');
 
 
@@ -45,9 +45,10 @@ function getHighScores(){
 }
 
 function saveNewScore(newScore){
+    // Ambil username terakhir dari variabel global 'username' yang sudah diset saat 'Mulai' atau 'Mulai Ulang'
     const finalUsername = username.trim() === "" ? 'Anonim' : username;
     const now = new Date();
-      
+    
     const newEntry = {
         score: newScore,
         username: finalUsername, 
@@ -63,20 +64,21 @@ function saveNewScore(newScore){
     }
 
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(highScores));
-      
+    
     maxScore = highScores.length > 0 ? highScores[0].score : 0;
     document.getElementById("highscore").textContent = "Skor Terbaik: " + maxScore;
 
     renderLeaderboard();
 }
-  
+
 function renderLeaderboard(){
     leaderboardEl.innerHTML = '';
     if(highScores.length === 0){
         leaderboardEl.innerHTML = '<li style="justify-content:center; color:var(--muted);">Belum ada skor</li>';
+        leaderboardContainerEl.style.display = 'block'; 
         return;
     }
-      
+    
     highScores.forEach((entry, index)=>{
         const li = document.createElement('li');
         li.innerHTML = `
@@ -86,8 +88,10 @@ function renderLeaderboard(){
         `;
         leaderboardEl.appendChild(li);
     });
+    // Pastikan leaderboard utama terlihat setelah di-render
+    leaderboardContainerEl.style.display = 'block'; 
 }
-  
+
 function renderOverlayLeaderboard(){
     overlayLeaderboardEl.innerHTML = '';
     const topScores = highScores.slice(0, 10);
@@ -107,7 +111,7 @@ function renderOverlayLeaderboard(){
         overlayLeaderboardEl.appendChild(li);
     });
 }
-  
+
 // --- Logika Menu ---
 function hideOverlay(el){
     el.classList.add('hidden');
@@ -116,23 +120,29 @@ function hideOverlay(el){
 function showMenu(){
     clearInterval(timerInterval);
     skor = 0;
-    timerStarted = false;
+    timerStarted = false; 
     document.getElementById("skor").textContent = "Skor: 0";
     document.getElementById("timer").textContent = "Waktu: 60";
     resultEl.textContent = "";
     optionsEl.innerHTML = "";
     boxesEl.innerHTML = ""; 
-    username = ""; 
+    
+    // Perbarui username global dari input untuk memastikan skor berikutnya menggunakan nama yang ditampilkan
+    username = usernameInputMenuEl.value.trim().substring(0, 15) || 'Anonim';
 
     menuOverlayEl.classList.remove('hidden');
-      
+    
     menuBtnLihatLeaderboard.style.display = 'block';
     menuBtnMulai.style.display = 'block';
     usernameInputMenuEl.style.display = 'block';
     overlayLeaderboardContainerEl.style.display = 'none';
+    
+    // Pastikan leaderboard utama terlihat di latar belakang
+    renderLeaderboard(); 
+
     usernameInputMenuEl.focus();
 }
-  
+
 function hideMenu(){
     hideOverlay(menuOverlayEl);
 }
@@ -144,23 +154,24 @@ function showLeaderboard(){
     usernameInputMenuEl.style.display = 'none'; 
     overlayLeaderboardContainerEl.style.display = 'block';
 }
-  
+
 menuBtnMulai.onclick = () => {
     let inputName = usernameInputMenuEl.value.trim().substring(0, 15);
-    username = inputName === "" ? 'Anonim' : inputName;
-      
+    // Simpan username saat memulai game
+    username = inputName === "" ? 'Anonim' : inputName; 
+    
     hideMenu();
     mulaiUlangGame();
 };
-  
+
 menuBtnLihatLeaderboard.onclick = () => {
     showLeaderboard();
 };
-  
+
 menuBtnKembali.onclick = () => {
     showMenu();
 };
-  
+
 usernameInputMenuEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         menuBtnMulai.click();
@@ -250,7 +261,7 @@ function pilih(val, el){
         kotakKosong.style.background = "var(--wrong)"; 
         kotakKosong.style.border = "2px solid var(--wrong)";
         el.style.border = "3px solid var(--wrong)";
-          
+        
         // Sorot jawaban yang benar (border hijau pada opsi yang benar)
         Array.from(optionsEl.children).forEach(o=>{
             if(parseInt(o.textContent) === correctAnswer){
@@ -302,29 +313,34 @@ function mulaiTimer(){
 function gameOver(){
     resultEl.style.color = "var(--accent)";
     resultEl.textContent = "⏳ Waktu Habis! Skor Akhir: " + skor;
-      
+    
     optionsEl.innerHTML = "";
     boxesEl.innerHTML = ""; 
-      
+    
+    // Mengatur ulang agar game bisa dimulai lagi
+    timerStarted = false; 
+    
     if(skor > 0){
-        saveNewScore(skor);
+        // Menyimpan skor dengan username yang terakhir diatur 
+        saveNewScore(skor); 
     }
-      
-    // Kembali ke menu setelah 2 detik
-    setTimeout(()=>{
-        showMenu();
-        usernameInputMenuEl.value = ""; 
-    }, 2000);
+    
+    // Langsung panggil showMenu() untuk menampilkan menu dengan skor baru dan input nama yang terisi
+    showMenu();
 }
-  
+
 function mulaiUlangGame(){
     skor = 0;
     timerStarted = false;
     clearInterval(timerInterval);
-
+    waktu = 60; // Pastikan waktu diatur ulang
     document.getElementById("skor").textContent = "Skor: 0";
     document.getElementById("timer").textContent = "Waktu: 60";
     resultEl.textContent = "";
+    
+    // Ambil nama dari input untuk memastikan skor berikutnya menggunakan nama yang ditampilkan
+    let inputName = usernameInputMenuEl.value.trim().substring(0, 15);
+    username = inputName === "" ? 'Anonim' : inputName; 
 
     soalBaru();
 }
@@ -336,4 +352,3 @@ btnBackToMenu.onclick = showMenu;
 // Inisialisasi: Tampilkan Menu
 renderLeaderboard(); 
 showMenu();
-mulaiUlangGame(); // Panggil ini untuk inisialisasi soal pertama, namun game belum dimulai sampai jawaban pertama dipilih.
