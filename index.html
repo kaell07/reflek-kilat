@@ -158,7 +158,11 @@
   h1 { margin: 30px 0 0 0; font-size: 24px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800; letter-spacing: -0.5px; }
   p.sub { color: var(--muted); margin: 8px 0 20px; text-align: center; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; font-size: 14px; }
   
-  .game-stats-bar { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; width: 100%; max-width: 600px; }
+  .game-stats-bar { 
+      display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; 
+      margin-bottom: 30px; width: 100%; max-width: 600px; 
+      margin-left: auto; margin-right: auto; /* Center stats bar */
+  }
   .stat-item { 
       background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); padding: 8px 15px; border-radius: 8px; 
       font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.05);
@@ -166,7 +170,12 @@
   #q-counter { color: var(--accent); }
   #timer { color: #fbbf24; }
 
-  .boxes { display: flex; gap: 12px; margin: 20px 0; justify-content: center; flex-wrap: wrap; }
+  /* --- UPDATE LAYOUT KOTAK SOAL --- */
+  .boxes { 
+      display: flex; gap: 12px; margin: 20px auto 40px; /* Margin auto untuk center horizontal, margin bawah ditambah */
+      justify-content: center; flex-wrap: wrap; 
+      width: 100%; max-width: 500px; /* Batasi lebar maksimal agar sejajar dengan opsi */
+  }
   .box { 
       width: 70px; height: 70px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
       border: 2px solid var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; 
@@ -175,17 +184,29 @@
   .box.empty { background: transparent; border-style: dashed; color: var(--muted); animation: pulse 1.5s infinite alternate; }
   @keyframes pulse { from { opacity: 0.6; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-  .options { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; justify-content: center; max-width: 500px; width: 100%; }
+  /* --- UPDATE LAYOUT OPSI JAWABAN --- */
+  .options { 
+      display: grid; /* Ganti ke Grid agar lebih presisi */
+      grid-template-columns: repeat(2, 1fr); /* Default 2 kolom (2x2) agar rapi di HP */
+      gap: 15px; 
+      margin: 0 auto; /* Center */
+      max-width: 350px; /* Lebar awal yang proporsional */
+      width: 100%; 
+  }
   .opt { 
-      width: 100px; height: 60px; display: flex; align-items: center; justify-content: center; 
-      font-size: 22px; font-weight: bold; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(5px);
-      border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; user-select: none; transition: all 0.1s; 
+      width: 100%; height: 70px; /* Tinggi disamakan dengan box soal */
+      display: flex; align-items: center; justify-content: center; 
+      font-size: 24px; font-weight: bold; 
+      background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(5px);
+      border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); 
+      cursor: pointer; user-select: none; transition: all 0.1s; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
   }
   .opt:active { transform: scale(0.95); }
-  .opt:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--accent); box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+  .opt:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--accent); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
   
-  .controls { margin-top: 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  button.game-btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+  .controls { margin-top: 40px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  button.game-btn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 16px;}
   button.game-btn:active { transform: scale(0.95); }
 
   .stats-page-container { margin-top: 30px; width: 95%; max-width: 600px; display: none; animation: fade-in 0.3s; }
@@ -275,6 +296,17 @@
       #sidebarToggleBtn { top: 15px; left: 15px; }
       .boxes { gap: 8px; }
       .box { width: 55px; height: 55px; font-size: 22px; }
+  }
+
+  /* Media Query untuk layar lebar agar sejajar memanjang */
+  @media (min-width: 600px) {
+      .options {
+          grid-template-columns: repeat(4, 1fr); /* 4 kolom sejajar */
+          max-width: 500px; /* Lebar menyesuaikan kotak atas */
+      }
+      .boxes {
+          max-width: 600px;
+      }
   }
 </style>
 </head>
