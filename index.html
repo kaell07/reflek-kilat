@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tes Logika & Kecermatan Angka</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  /* CSS SAMA SEPERTI SEBELUMNYA */
+  :root { --bg-overlay: rgba(15, 23, 42, 0.6); --glass-bg: rgba(15, 23, 42, 0.65); --glass-border: rgba(255, 255, 255, 0.1); --muted: #9aa4b2; --accent: #38bdf8; --correct: #4ade80; --wrong: #f87171; --sidebar-width: 300px; }
+  body { font-family: 'Inter', sans-serif; background: url('https://th.bing.com/th/id/OIP.iJaUJwCwFrvQ0-0YC3EvNAHaFS?w=246&h=180&c=7&r=0&o=7&pid=1.7&rm=3') no-repeat center center fixed; background-size: cover; color: #fff; margin: 0; padding: 0; height: 100vh; display: flex; overflow: hidden; }
+  body::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-overlay); z-index: -1; }
+  .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+  .sidebar { width: var(--sidebar-width); background: rgba(2, 6, 23, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; transition: transform 0.3s ease; transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { flex-grow: 1; width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-y: auto; padding: 24px; position: relative; transition: margin-left 0.3s ease; }
+  /* UI COMPONENT STYLES */
+  .avatar-container { position: relative; width: 80px; height: 80px; margin: 0 auto 15px; cursor: pointer; border-radius: 50%; }
+  .avatar { width: 100%; height: 100%; background: rgba(56, 189, 248, 0.2); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; border: 2px solid #fff; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); overflow: hidden; position: relative; backdrop-filter: blur(5px); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; font-size: 24px; color: #fff; }
+  .avatar-container:hover .avatar-overlay { opacity: 1; }
+  .menu-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
+  .menu-overlay.hidden { opacity: 0; pointer-events: none; display: none; }
+  .menu-content { background: var(--glass-bg); backdrop-filter: blur(16px); padding: 30px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.15); max-height: 90vh; overflow-y: auto; }
+  .input-group { position: relative; width: 100%; margin-bottom: 10px; }
+  .auth-input { padding: 12px; width: 100%; box-sizing: border-box; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; outline: none; transition: 0.2s; }
+  .menu-btn { width: 100%; margin: 8px 0; padding: 14px; font-size: 16px; background: var(--accent); color: #0f172a; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+  .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+  .sidebar-backdrop.active { display: block; }
+  .password-toggle-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted); font-size: 18px; }
+  /* Game UI */
+  #sidebarToggleBtn { position: fixed; top: 20px; left: 20px; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(5px); border: 1px solid var(--accent); color: var(--accent); width: 40px; height: 40px; border-radius: 8px; font-size: 20px; cursor: pointer; z-index: 201; display: flex; align-items: center; justify-content: center; }
+  .game-stats-bar { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; }
+  .stat-item { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; font-weight: 600; }
+  .boxes { display: flex; gap: 12px; margin: 20px auto 40px; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 500px; }
+  .box { width: 70px; height: 70px; background: rgba(15, 23, 42, 0.6); border: 2px solid var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; }
+  .box.empty { background: transparent; border-style: dashed; color: var(--muted); }
+  .options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 0 auto; max-width: 350px; width: 100%; }
+  .opt { width: 100%; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; background: rgba(30, 41, 59, 0.7); border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; }
+  .register-fields { display: none; animation: fadeIn 0.3s; }
+  @media (min-width: 600px) { .options { grid-template-columns: repeat(4, 1fr); max-width: 500px; } .boxes { max-width: 600px; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  /* Loading Indicator for Avatar */
+  .avatar-loading { opacity: 0.5; pointer-events: none; border-color: var(--correct) !important; }
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<aside class="sidebar glass-panel" id="mainSidebar">
+    <div style="text-align:center; margin-bottom:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px;">
+        <!-- AVATAR UPLOAD SECTION -->
+        <div class="avatar-container" id="avatar-container" onclick="triggerAvatarUpload()">
+            <div class="avatar" id="sidebar-avatar"><span id="default-avatar-text">👤</span></div>
+            <div class="avatar-overlay">📷</div>
+        </div>
+        <input type="file" id="avatar-upload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(this)">
+        
+        <h3 id="sidebar-username" style="color:var(--accent); margin:10px 0 0; font-weight:bold;">Guest</h3>
+        <p id="sidebar-fullname" style="font-size:14px; color:var(--muted);">Silakan Login</p>
+        <p id="sidebar-highscore-display" style="color:var(--correct); font-weight:bold; margin-top:5px;">Skor: 0</p>
+    </div>
+
+    <button class="menu-btn" id="btnSidebarMenu" style="background:transparent; border:1px solid rgba(255,255,255,0.1); text-align:left; margin-bottom:10px;">🏠 Menu Utama</button>
+    <button class="menu-btn" id="btnSidebarLeaderboard" style="background:transparent; border:1px solid rgba(255,255,255,0.1); text-align:left; color:var(--accent);">🏆 Leaderboard</button>
+    
+    <button class="menu-btn" id="btnSidebarLogout" style="background:rgba(248,113,113,0.1); color:var(--wrong); border:1px solid var(--wrong); margin-top:auto; display:none;">🔓 Logout</button>
+</aside>
+
+<main class="main-content">
+    <button id="sidebarToggleBtn" onclick="toggleSidebar()">☰</button>
+
+    <!-- MENU & AUTH -->
+    <div id="menu-overlay" class="menu-overlay">
+        <div class="menu-content">
+            <h2 id="menu-title" style="color:var(--accent); font-size:24px; font-weight:bold; margin-bottom:20px;">Tes Logika</h2>
+
+            <!-- AUTH SECTION -->
+            <div id="auth-section">
+                <div class="input-group">
+                    <input type="text" id="auth-username" class="auth-input" maxlength="15" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="auth-password" class="auth-input" placeholder="Password">
+                    <span class="password-toggle-icon" id="pass-toggle-btn" onclick="toggleLoginPassword()">👁️</span>
+                </div>
+                
+                <!-- REGISTER FIELDS -->
+                <div id="register-fields" class="register-fields">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="auth-fullname" class="auth-input" maxlength="25" placeholder="Nama Lengkap">
+                    </div>
+                    <input type="text" id="auth-school" class="auth-input" maxlength="30" placeholder="Sekolah (Opsional)">
+                </div>
+
+                <p id="auth-message" style="color:var(--wrong); font-size:13px; margin:10px 0; display:none;"></p>
+
+                <button class="menu-btn" id="btnAuthAction">Masuk & Main</button>
+                <div style="margin-top:15px; font-size:13px; color:var(--accent); cursor:pointer; text-decoration:underline;" id="auth-toggle-text" onclick="toggleAuthMode()">Belum punya akun? Daftar</div>
+            </div>
+
+            <!-- GAME START SECTION (Logged In) -->
+            <div id="game-config-section" style="display:none;">
+                <p id="user-greeting" style="color:var(--correct); font-weight:bold; margin-bottom:15px;">Halo!</p>
+                <div style="margin-bottom:15px; text-align:left;">
+                    <label style="color:var(--muted); font-size:13px;">Kesulitan:</label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                         <button onclick="setLvl('1')" class="menu-btn" style="padding:8px; font-size:12px; flex:1;">Aritmatika</button>
+                         <button onclick="setLvl('2')" class="menu-btn" style="padding:8px; font-size:12px; flex:1; background:rgba(255,255,255,0.1);">Geometri</button>
+                         <button onclick="setLvl('3')" class="menu-btn" style="padding:8px; font-size:12px; flex:1; background:rgba(255,255,255,0.1);">Campur</button>
+                    </div>
+                </div>
+                <button class="menu-btn" id="btnMulai">Mulai Permainan 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME AREA -->
+    <div id="game-area" style="display:none; width:100%; max-width:600px; text-align:center;">
+        <h1 style="font-size:24px; font-weight:bold; margin-top:20px;">Tes Logika</h1>
+        <div class="game-stats-bar">
+            <div class="stat-item">⏱️ <span id="timer">60</span></div>
+            <div class="stat-item">⭐ <span id="skor">0</span></div>
+        </div>
+        <div class="boxes" id="boxes"></div>
+        <div class="options" id="options"></div>
+        <div id="result" style="height:20px; font-weight:bold; margin-top:10px;"></div>
+        <div class="controls">
+            <button class="menu-btn" id="btnNew" style="width:auto; padding:10px 20px;">🔄 Ulang</button>
+            <button class="menu-btn" id="btnBackToMenu" style="width:auto; padding:10px 20px; background:rgba(255,255,255,0.1);">🏠 Menu</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="game-over-overlay" class="menu-overlay hidden">
+        <div class="menu-content">
+            <h2>Selesai!</h2>
+            <div style="font-size:40px; color:var(--correct); font-weight:bold; margin:20px 0;" id="go-score">0</div>
+            <button class="menu-btn" onclick="mulaiUlangGame()">Main Lagi</button>
+            <button class="menu-btn" onclick="showMenu()" style="background:transparent; border:1px solid var(--accent);">Menu Utama</button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard-overlay" class="menu-overlay hidden">
+        <div class="menu-content" style="max-width:500px;">
+            <h2>🏆 Top 100</h2>
+            <ul id="leaderboard-list" style="text-align:left; padding:0; list-style:none; margin-bottom:20px;"></ul>
+            <button class="menu-btn" onclick="closeLeaderboard()">Tutup</button>
+        </div>
+    </div>
+</main>
+
+<script>
+// 1. KONFIGURASI URL
+const API_URL = "https://unosiens.site/reflek-game/api.php"; // PASTIKAN INI BENAR
+
+let currentUser = null, isLoggedIn = false, currentLevel = '1';
+let skor=0, timer=60, interval=null, isRegisterMode=false;
+let numbers=[], answer=0;
+
+const els = {
+    authSec: document.getElementById('auth-section'),
+    gameConf: document.getElementById('game-config-section'),
+    menuOv: document.getElementById('menu-overlay'),
+    gameArea: document.getElementById('game-area'),
+    goOv: document.getElementById('game-over-overlay'),
+    lbOv: document.getElementById('leaderboard-overlay'),
+    sidebar: document.getElementById('mainSidebar'),
+    sbBack: document.getElementById('sidebarBackdrop')
+};
+
+// --- API ---
+async function apiCall(action, data={}) {
+    try {
+        const res = await fetch(`${API_URL}?action=${action}`, {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+        });
+        return await res.json();
+    } catch(e) { return {status:'error', message:'Koneksi Gagal (Cek Console)'}; }
+}
+
+// --- AVATAR FIX ---
+window.triggerAvatarUpload = () => {
+    if(!isLoggedIn) { alert("Login dulu untuk ganti avatar!"); return; }
+    document.getElementById('avatar-upload').click();
+};
+
+window.handleAvatarUpload = (input) => {
+    if(input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        
+        // Indikator loading UI
+        const avatarEl = document.getElementById('sidebar-avatar');
+        avatarEl.classList.add('avatar-loading');
+        
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const cvs = document.createElement('canvas');
+                const MAX = 150; 
+                let w = img.width, h = img.height;
+                if(w>h){ if(w>MAX){ h*=MAX/w; w=MAX; } } else { if(h>MAX){ w*=MAX/h; h=MAX; } }
+                cvs.width = w; cvs.height = h;
+                cvs.getContext('2d').drawImage(img,0,0,w,h);
+                const base64 = cvs.toDataURL('image/jpeg', 0.7);
+                
+                // Update Lokal (Optimistik)
+                const oldAvatar = currentUser.avatar_url;
+                currentUser.avatar_url = base64;
+                updateSidebar(currentUser);
+                localStorage.setItem('logic_game_sess', JSON.stringify(currentUser));
+                
+                // KIRIM KE DATABASE
+                apiCall('update_profile', {
+                    username: currentUser.username,
+                    avatar_url: base64
+                }).then(res => {
+                    avatarEl.classList.remove('avatar-loading');
+                    if(res.status === 'success') {
+                        console.log("Avatar tersimpan di server.");
+                    } else {
+                        // Revert jika gagal
+                        alert("Gagal upload ke server: " + res.message);
+                        currentUser.avatar_url = oldAvatar;
+                        updateSidebar(currentUser);
+                    }
+                }).catch(err => {
+                    avatarEl.classList.remove('avatar-loading');
+                    alert("Terjadi kesalahan koneksi.");
+                });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+// --- AUTH ---
+window.toggleLoginPassword = () => {
+    const inp = document.getElementById('auth-password');
+    inp.type = inp.type==='password'?'text':'password';
+    document.getElementById('pass-toggle-btn').textContent = inp.type==='password'?'👁️':'🚫';
+};
+
+window.toggleAuthMode = () => {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('register-fields').style.display = isRegisterMode?'block':'none';
+    document.getElementById('btnAuthAction').textContent = isRegisterMode?'Daftar Akun':'Masuk & Main';
+    document.getElementById('auth-toggle-text').textContent = isRegisterMode?'Sudah punya akun? Login':'Belum punya akun? Daftar';
+};
+
+document.getElementById('btnAuthAction').onclick = async () => {
+    const u = document.getElementById('auth-username').value.trim();
+    const p = document.getElementById('auth-password').value;
+    const msg = document.getElementById('auth-message');
+    if(!u || !p) { msg.textContent="Isi semua data"; msg.style.display='block'; return; }
+    
+    msg.textContent="Memproses..."; msg.style.display='block';
+    
+    if(isRegisterMode) {
+        const n = document.getElementById('auth-fullname').value.trim();
+        const s = document.getElementById('auth-school').value.trim();
+        const res = await apiCall('register', {username:u, password:p, fullname:n, school:s});
+        if(res.status==='success') { 
+            alert("Berhasil! Silakan login."); 
+            toggleAuthMode(); 
+            msg.style.display='none';
+        } else { msg.textContent = res.message; }
+    } else {
+        const res = await apiCall('login', {username:u, password:p});
+        if(res.status==='success') {
+            currentUser = res.user;
+            currentUser.high_score = parseInt(currentUser.high_score)||0;
+            localStorage.setItem('logic_game_sess', JSON.stringify(currentUser));
+            isLoggedIn=true; updateSidebar(currentUser); showMenu();
+            msg.style.display='none';
+        } else { msg.textContent = res.message; }
+    }
+};
+
+// --- UI LOGIC ---
+function updateSidebar(u) {
+    const sb = {
+        user: document.getElementById('sidebar-username'),
+        full: document.getElementById('sidebar-fullname'),
+        av: document.getElementById('sidebar-avatar'),
+        sc: document.getElementById('sidebar-highscore-display'),
+        logout: document.getElementById('btnSidebarLogout')
+    };
+    if(u) {
+        sb.user.textContent = u.username;
+        sb.full.textContent = u.fullname;
+        sb.sc.textContent = "Skor: " + u.high_score;
+        sb.av.innerHTML = u.avatar_url ? `<img src="${u.avatar_url}">` : u.username[0].toUpperCase();
+        sb.logout.style.display = 'block';
+    } else {
+        sb.user.textContent="Guest"; sb.full.textContent="Silakan Login"; 
+        sb.av.innerHTML="👤"; sb.sc.textContent=""; sb.logout.style.display='none';
+    }
+}
+
+function showMenu() {
+    els.gameArea.style.display='none'; els.goOv.classList.add('hidden');
+    els.menuOv.classList.remove('hidden');
+    if(isLoggedIn) {
+        els.authSec.style.display='none'; els.gameConf.style.display='block';
+        document.getElementById('user-greeting').textContent = "Halo, " + currentUser.username;
+    } else {
+        els.authSec.style.display='block'; els.gameConf.style.display='none';
+    }
+}
+
+// --- GAMEPLAY STANDARD ---
+window.setLvl = (l) => currentLevel = l;
+document.getElementById('btnMulai').onclick = () => mulaiUlangGame();
+
+window.mulaiUlangGame = () => {
+    els.menuOv.classList.add('hidden'); els.goOv.classList.add('hidden'); els.gameArea.style.display='block';
+    skor=0; timer=60; document.getElementById('skor').textContent=0;
+    nextQ();
+    clearInterval(interval);
+    interval = setInterval(()=>{
+        timer--; document.getElementById('timer').textContent=timer;
+        if(timer<=0) gameOver();
+    },1000);
+};
+
+function nextQ() {
+    // Logika Soal Sederhana
+    let type = currentLevel=='1'?'add':'geo';
+    if(currentLevel=='3') type = Math.random()>0.5?'add':'geo';
+    
+    let seq=[]; 
+    if(type=='add') { let s=Math.floor(Math.random()*20)+5, d=Math.floor(Math.random()*5)+2; for(let i=0;i<5;i++) seq.push(s+i*d); }
+    else { let s=Math.floor(Math.random()*5)+1, r=2; for(let i=0;i<5;i++) seq.push(s*Math.pow(r,i)); }
+    
+    let miss = Math.floor(Math.random()*3)+1;
+    answer = seq[miss]; seq[miss]=null;
+    
+    document.getElementById('boxes').innerHTML = seq.map(n=>`<div class="box ${n===null?'empty':''}">${n===null?'?':n}</div>`).join('');
+    
+    let opts = [answer];
+    while(opts.length<4) { let x = answer + Math.floor(Math.random()*10)-5; if(x>0 && !opts.includes(x)) opts.push(x); }
+    opts.sort(()=>Math.random()-0.5);
+    
+    document.getElementById('options').innerHTML = opts.map(o=>`<div class="opt" onclick="checkAns(${o}, this)">${o}</div>`).join('');
+}
+
+window.checkAns = (val, el) => {
+    if(val===answer) {
+        skor+=10; document.getElementById('skor').textContent=skor;
+        el.style.background='var(--correct)';
+        setTimeout(nextQ, 200);
+    } else {
+        skor-=5; document.getElementById('skor').textContent=skor;
+        el.style.background='var(--wrong)';
+        setTimeout(nextQ, 200);
+    }
+};
+
+function gameOver() {
+    clearInterval(interval);
+    document.getElementById('go-score').textContent=skor;
+    els.gameArea.style.display='none'; els.goOv.classList.remove('hidden');
+    
+    if(isLoggedIn && skor > currentUser.high_score) {
+        currentUser.high_score = skor;
+        localStorage.setItem('logic_game_sess', JSON.stringify(currentUser));
+        updateSidebar(currentUser);
+        apiCall('submit_score', {username:currentUser.username, score:skor, school:currentUser.school});
+    }
+}
+
+// --- LEADERBOARD ---
+document.getElementById('btnSidebarLeaderboard').onclick = async () => {
+    els.lbOv.classList.remove('hidden');
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = '<li>Memuat...</li>';
+    const data = await apiCall('get_leaderboard');
+    if(Array.isArray(data)) {
+        list.innerHTML = data.map((u,i) => `
+            <li style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:5px;">
+                <span>#${i+1} ${u.username}</span> <span style="color:var(--correct);">${u.score}</span>
+            </li>
+        `).join('');
+    } else {
+        list.innerHTML = '<li>Gagal memuat data.</li>';
+    }
+};
+window.closeLeaderboard = () => els.lbOv.classList.add('hidden');
+
+// --- SIDEBAR ---
+window.toggleSidebar = () => { els.sidebar.classList.toggle('open'); els.sbBack.classList.toggle('active'); };
+window.closeSidebar = () => { els.sidebar.classList.remove('open'); els.sbBack.classList.remove('active'); };
+document.getElementById('btnSidebarMenu').onclick = () => { closeSidebar(); showMenu(); };
+document.getElementById('btnSidebarLogout').onclick = () => { 
+    localStorage.removeItem('logic_game_sess'); isLoggedIn=false; currentUser=null; 
+    updateSidebar(null); closeSidebar(); showMenu(); 
+};
+
+// Init
+const saved = localStorage.getItem('logic_game_sess');
+if(saved) { currentUser=JSON.parse(saved); isLoggedIn=true; updateSidebar(currentUser); showMenu(); } 
+else { showMenu(); }
+
+</script>
+</body>
+</html>
